@@ -1,3 +1,5 @@
+const mpDrawing = window;
+
 import { FilesetResolver, PoseLandmarker, FaceLandmarker, HandLandmarker } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8";
 
 const videoElement = document.querySelector('.input_video');
@@ -42,7 +44,7 @@ canvasElement.height = 720;
 const modelConfigs = {
     full: {
         poseModel: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/1/pose_landmarker_heavy.task',
-        fallbackPoseModel: '/models/pose_landmarker_heavy.task', // Optional: host locally
+        fallbackPoseModel: '/models/pose_landmarker_heavy.task',
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.5
     },
@@ -61,9 +63,9 @@ const modelConfigs = {
 };
 
 const faceModel = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
-const fallbackFaceModel = '/models/face_landmarker.task'; // Optional: host locally
+const fallbackFaceModel = '/models/face_landmarker.task';
 const handModel = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
-const fallbackHandModel = '/models/hand_landmarker.task'; // Optional: host locally
+const fallbackHandModel = '/models/hand_landmarker.task';
 
 async function loadModelWithFallback(modelUrl, fallbackUrl) {
     try {
@@ -84,7 +86,7 @@ async function loadModelWithFallback(modelUrl, fallbackUrl) {
 
 async function createLandmarkers() {
     statusElement.textContent = 'Initializing models...';
-    const timeoutMs = 30000; // 30 seconds timeout
+    const timeoutMs = 30000;
     const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Model loading timed out after 30 seconds')), timeoutMs);
     });
@@ -308,26 +310,13 @@ function interpolateHandJoints(landmarks) {
 function generateVirtualLandmarks(poseLandmarks) {
     if (!poseLandmarks) return [];
     const virtual = [];
-    
     const shoulders = [poseLandmarks[11], poseLandmarks[12]];
-    if (shoulders[0] && shoulders[1]) {
-        virtual.push(interpolateBetweenPoints(shoulders[0], shoulders[1], 0.5));
-    }
+    if (shoulders[0] && shoulders[1]) virtual.push(interpolateBetweenPoints(shoulders[0], shoulders[1], 0.5));
     const hips = [poseLandmarks[23], poseLandmarks[24]];
-    if (hips[0] && hips[1]) {
-        virtual.push(interpolateBetweenPoints(hips[0], hips[1], 0.5));
-    }
-    
-    if (virtual.length === 2) {
-        virtual.push(interpolateBetweenPoints(virtual[0], virtual[1], 0.5));
-    }
-    
-    const leftShoulder = poseLandmarks[11];
-    const leftElbow = poseLandmarks[13];
-    const leftWrist = poseLandmarks[15];
-    if (leftShoulder && leftElbow) {
-        virtual.push(interpolateBetweenPoints(leftShoulder, leftElbow, 0.5));
-    }
+    if (hips[0] && hips[1]) virtual.push(interpolateBetweenPoints(hips[0], hips[1], 0.5));
+    if (virtual.length === 2) virtual.push(interpolateBetweenPoints(virtual[0], virtual[1], 0.5));
+    const leftShoulder = poseLandmarks[11], leftElbow = poseLandmarks[13], leftWrist = poseLandmarks[15];
+    if (leftShoulder && leftElbow) virtual.push(interpolateBetweenPoints(leftShoulder, leftElbow, 0.5));
     if (leftElbow && leftWrist) {
         virtual.push(interpolateBetweenPoints(leftElbow, leftWrist, 0.5));
         virtual.push(interpolateBetweenPoints(leftElbow, leftWrist, 0.25));
@@ -337,12 +326,8 @@ function generateVirtualLandmarks(poseLandmarks) {
         virtual.push(interpolateBetweenPoints(leftElbow, leftWrist, 0.625));
         virtual.push(interpolateBetweenPoints(leftElbow, leftWrist, 0.875));
     }
-    const rightShoulder = poseLandmarks[12];
-    const rightElbow = poseLandmarks[14];
-    const rightWrist = poseLandmarks[16];
-    if (rightShoulder && rightElbow) {
-        virtual.push(interpolateBetweenPoints(rightShoulder, rightElbow, 0.5));
-    }
+    const rightShoulder = poseLandmarks[12], rightElbow = poseLandmarks[14], rightWrist = poseLandmarks[16];
+    if (rightShoulder && rightElbow) virtual.push(interpolateBetweenPoints(rightShoulder, rightElbow, 0.5));
     if (rightElbow && rightWrist) {
         virtual.push(interpolateBetweenPoints(rightElbow, rightWrist, 0.5));
         virtual.push(interpolateBetweenPoints(rightElbow, rightWrist, 0.25));
@@ -352,13 +337,8 @@ function generateVirtualLandmarks(poseLandmarks) {
         virtual.push(interpolateBetweenPoints(rightElbow, rightWrist, 0.625));
         virtual.push(interpolateBetweenPoints(rightElbow, rightWrist, 0.875));
     }
-    
-    const leftHip = poseLandmarks[23];
-    const leftKnee = poseLandmarks[25];
-    const leftAnkle = poseLandmarks[27];
-    if (leftHip && leftKnee) {
-        virtual.push(interpolateBetweenPoints(leftHip, leftKnee, 0.5));
-    }
+    const leftHip = poseLandmarks[23], leftKnee = poseLandmarks[25], leftAnkle = poseLandmarks[27];
+    if (leftHip && leftKnee) virtual.push(interpolateBetweenPoints(leftHip, leftKnee, 0.5));
     if (leftKnee && leftAnkle) {
         virtual.push(interpolateBetweenPoints(leftKnee, leftAnkle, 0.5));
         virtual.push(interpolateBetweenPoints(leftKnee, leftAnkle, 0.25));
@@ -368,12 +348,8 @@ function generateVirtualLandmarks(poseLandmarks) {
         virtual.push(interpolateBetweenPoints(leftKnee, leftAnkle, 0.625));
         virtual.push(interpolateBetweenPoints(leftKnee, leftAnkle, 0.875));
     }
-    const rightHip = poseLandmarks[24];
-    const rightKnee = poseLandmarks[26];
-    const rightAnkle = poseLandmarks[28];
-    if (rightHip && rightKnee) {
-        virtual.push(interpolateBetweenPoints(rightHip, rightKnee, 0.5));
-    }
+    const rightHip = poseLandmarks[24], rightKnee = poseLandmarks[26], rightAnkle = poseLandmarks[28];
+    if (rightHip && rightKnee) virtual.push(interpolateBetweenPoints(rightHip, rightKnee, 0.5));
     if (rightKnee && rightAnkle) {
         virtual.push(interpolateBetweenPoints(rightKnee, rightAnkle, 0.5));
         virtual.push(interpolateBetweenPoints(rightKnee, rightAnkle, 0.25));
@@ -383,24 +359,14 @@ function generateVirtualLandmarks(poseLandmarks) {
         virtual.push(interpolateBetweenPoints(rightKnee, rightAnkle, 0.625));
         virtual.push(interpolateBetweenPoints(rightKnee, rightAnkle, 0.875));
     }
-    
-    const nose = poseLandmarks[0];
-    const midHip = virtual[1];
+    const nose = poseLandmarks[0], midHip = virtual[1];
     if (nose && midHip) {
         virtual.push(interpolateBetweenPoints(nose, midHip, 0.33));
         virtual.push(interpolateBetweenPoints(nose, midHip, 0.66));
         virtual.push(interpolateBetweenPoints(nose, midHip, 0.5));
     }
-    
-    const leftShoulderToHip = poseLandmarks[11] && poseLandmarks[23];
-    if (leftShoulderToHip) {
-        virtual.push(interpolateBetweenPoints(poseLandmarks[11], poseLandmarks[23], 0.5));
-    }
-    const rightShoulderToHip = poseLandmarks[12] && poseLandmarks[24];
-    if (rightShoulderToHip) {
-        virtual.push(interpolateBetweenPoints(poseLandmarks[12], poseLandmarks[24], 0.5));
-    }
-    
+    if (poseLandmarks[11] && poseLandmarks[23]) virtual.push(interpolateBetweenPoints(poseLandmarks[11], poseLandmarks[23], 0.5));
+    if (poseLandmarks[12] && poseLandmarks[24]) virtual.push(interpolateBetweenPoints(poseLandmarks[12], poseLandmarks[24], 0.5));
     return virtual;
 }
 
@@ -410,30 +376,14 @@ function generatePoseMesh(landmarks) {
         triangles.push([11, 12, 23]);
         triangles.push([12, 23, 24]);
     }
-    if (landmarks[11] && landmarks[13]) {
-        triangles.push([11, 13, interpolateBetweenPoints(landmarks[11], landmarks[13], 0.5)]);
-    }
-    if (landmarks[12] && landmarks[14]) {
-        triangles.push([12, 14, interpolateBetweenPoints(landmarks[12], landmarks[14], 0.5)]);
-    }
-    if (landmarks[13] && landmarks[15]) {
-        triangles.push([13, 15, interpolateBetweenPoints(landmarks[13], landmarks[15], 0.5)]);
-    }
-    if (landmarks[14] && landmarks[16]) {
-        triangles.push([14, 16, interpolateBetweenPoints(landmarks[14], landmarks[16], 0.5)]);
-    }
-    if (landmarks[23] && landmarks[25]) {
-        triangles.push([23, 25, interpolateBetweenPoints(landmarks[23], landmarks[25], 0.5)]);
-    }
-    if (landmarks[24] && landmarks[26]) {
-        triangles.push([24, 26, interpolateBetweenPoints(landmarks[24], landmarks[26], 0.5)]);
-    }
-    if (landmarks[25] && landmarks[27]) {
-        triangles.push([25, 27, interpolateBetweenPoints(landmarks[25], landmarks[27], 0.5)]);
-    }
-    if (landmarks[26] && landmarks[28]) {
-        triangles.push([26, 28, interpolateBetweenPoints(landmarks[26], landmarks[28], 0.5)]);
-    }
+    if (landmarks[11] && landmarks[13]) triangles.push([11, 13, interpolateBetweenPoints(landmarks[11], landmarks[13], 0.5)]);
+    if (landmarks[12] && landmarks[14]) triangles.push([12, 14, interpolateBetweenPoints(landmarks[12], landmarks[14], 0.5)]);
+    if (landmarks[13] && landmarks[15]) triangles.push([13, 15, interpolateBetweenPoints(landmarks[13], landmarks[15], 0.5)]);
+    if (landmarks[14] && landmarks[16]) triangles.push([14, 16, interpolateBetweenPoints(landmarks[14], landmarks[16], 0.5)]);
+    if (landmarks[23] && landmarks[25]) triangles.push([23, 25, interpolateBetweenPoints(landmarks[23], landmarks[25], 0.5)]);
+    if (landmarks[24] && landmarks[26]) triangles.push([24, 26, interpolateBetweenPoints(landmarks[24], landmarks[26], 0.5)]);
+    if (landmarks[25] && landmarks[27]) triangles.push([25, 27, interpolateBetweenPoints(landmarks[25], landmarks[27], 0.5)]);
+    if (landmarks[26] && landmarks[28]) triangles.push([26, 28, interpolateBetweenPoints(landmarks[26], landmarks[28], 0.5)]);
     return triangles;
 }
 
@@ -769,12 +719,10 @@ function setupEventListeners() {
     });
 }
 
-// Initialize button states
 startBtn.disabled = false;
 stopBtn.disabled = true;
 processUpload.disabled = false;
 
-// Setup event listeners
 setupEventListeners();
 
 statusElement.textContent = 'Ready. Select model and start tracking or upload a file.';
