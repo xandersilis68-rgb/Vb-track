@@ -249,7 +249,14 @@ function interpolateLandmarks(landmarks, connections) {
 
 function enhanceFaceContours(landmarks) {
     const enhanced = [];
-    const contourSets = [mpDrawing.FACEMESH_FACE_OVAL, mpDrawing.FACEMESH_LIPS, mpDrawing.FACEMESH_LEFT_EYE, mpDrawing.FACEMESH_RIGHT_EYE, mpDrawing.FACEMESH_LEFT_EYEBROW, mpDrawing.FACEMESH_RIGHT_EYEBROW];
+    const contourSets = [
+        mpDrawing.FACEMESH_FACE_OVAL,
+        mpDrawing.FACEMESH_LIPS,
+        mpDrawing.FACEMESH_LEFT_EYE,
+        mpDrawing.FACEMESH_RIGHT_EYE,
+        mpDrawing.FACEMESH_LEFT_EYEBROW,
+        mpDrawing.FACEMESH_RIGHT_EYEBROW
+    ];
     const factors = Array.from({length: 19}, (_, i) => (i + 1) * 0.05);
     contourSets.forEach(contour => {
         contour.forEach(([idx1, idx2]) => {
@@ -294,7 +301,7 @@ function interpolateHandJoints(landmarks) {
         if (start && end) {
             interpolated.push(interpolateBetweenPoints(start, end, 0.5));
         }
-    });
+    }
     return interpolated;
 }
 
